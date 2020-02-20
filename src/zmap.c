@@ -607,6 +607,10 @@ int main(int argc, char *argv[])
 		log_fatal("ipv6", "No IPv6 source address specified");
 	}
 
+	if (!zconf.ipv6_target_filename && zconf.ipv6_source_ip) {
+		log_fatal("ipv6", "No IPv6 target file specified");
+	}
+
 	if (zconf.num_retries < 0) {
 		log_fatal("zmap", "Invalid retry count");
 	}
