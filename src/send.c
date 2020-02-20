@@ -297,7 +297,11 @@ int send_run(sock_t st, shard_t *s)
 	struct in6_addr ipv6_dst;
 
 	if (ipv6) {
-		ipv6_target_file_get_ipv6(&ipv6_dst);
+		int ret = ipv6_target_file_get_ipv6(&ipv6_dst);
+		if (ret != 0) {
+			log_debug("send", "send thread %hhu finished, no more target IPv6 addresses", s->thread_id);
+			goto cleanup;
+		}
 		probe_data = malloc(2*sizeof(struct in6_addr));
 	} else {
 		current_ip = shard_get_cur_ip(s);
