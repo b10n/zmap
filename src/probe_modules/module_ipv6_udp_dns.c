@@ -115,11 +115,6 @@ int ipv6_udp_dns_global_initialize(struct state_conf *conf) {
 	num_ports = conf->source_port_last - conf->source_port_first + 1;
 	udp_set_num_ports(num_ports);
 
-	// Only look at received packets destined to the specified scanning address (useful for parallel zmap scans)
-	if (asprintf((char ** restrict) &module_ipv6_udp_dns.pcap_filter, "%s && ip6 dst host %s", module_ipv6_udp_dns.pcap_filter, conf->ipv6_source_ip) == -1) {
-		return 1;
-	}
-
 	udp_send_msg_len = sizeof(udp_dns_msg_default);
 	udp_send_msg = malloc(udp_send_msg_len);
 	memcpy(udp_send_msg, udp_dns_msg_default, udp_send_msg_len);
