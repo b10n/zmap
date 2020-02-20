@@ -35,7 +35,7 @@ int ipv6_target_file_init(char *file)
 	return 0;
 }
 
-int ipv6_target_file_get_ipv6(struct in6_addr *dst)
+int ipv6_target_file_get_ipv6(struct in6_addr *dst, struct in6_addr *src)
 {
     // ipv6_target_file_init() needs to be called before ipv6_target_file_get_ipv6()
 	assert(fp);
@@ -48,11 +48,25 @@ int ipv6_target_file_get_ipv6(struct in6_addr *dst)
 		if ((pos = strchr(line, '\n')) != NULL) {
 			*pos = '\0';
 		}
-		int rc = inet_pton(AF_INET6, line, dst);
+
+		// Read target IP
+		pos = strtok(line, ",");
+		int rc = inet_pton(AF_INET6, pos, dst);
 		if (rc != 1) {
-			log_fatal(LOGGER_NAME, "could not parse IPv6 address from line: %s: %s", line, strerror(errno));
+			log_fatal(LOGGER_NAME, "could not parse target IPv6 address from line: %s: %s", line, strerror(errno));
 			return 1;
 		}
+
+		// Read source IP, if not present leave src unchanged
+		pos = strtok(NULL, ",");
+		if (pos) {
+			rc = inet_pton(AF_INET6, pos, src);
+			if (rc != 1) {
+				log_fatal(LOGGER_NAME, "could not parse source IPv6 address from line: %s: %s", line, strerror(errno));
+				return 1;
+			}
+		}
+
 	} else {
 		return 1;
 	}

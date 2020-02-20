@@ -63,7 +63,7 @@ static uint16_t num_src_ports;
 
 // IPv6
 static int ipv6 = 0;
-static struct in6_addr ipv6_src;
+static struct in6_addr ipv6_default_src;
 
 
 void sig_handler_increase_speed(UNUSED int signal)
@@ -88,7 +88,7 @@ iterator_t *send_init(void)
 	// IPv6
 	if (zconf.ipv6_target_filename) {
 		ipv6 = 1;
-		int ret = inet_pton(AF_INET6, (char *) zconf.ipv6_source_ip, &ipv6_src);
+		int ret = inet_pton(AF_INET6, (char *) zconf.ipv6_source_ip, &ipv6_default_src);
 		if (ret != 1) {
 			log_fatal("send", "could not read valid IPv6 src address, inet_pton returned `%d'", ret);
 		}
@@ -295,9 +295,11 @@ int send_run(sock_t st, shard_t *s)
 	// Get the initial IP to scan.
 	uint32_t current_ip;
 	struct in6_addr ipv6_dst;
+	struct in6_addr ipv6_src;
 
 	if (ipv6) {
-		int ret = ipv6_target_file_get_ipv6(&ipv6_dst);
+		ipv6_src = ipv6_default_src;
+		int ret = ipv6_target_file_get_ipv6(&ipv6_dst, &ipv6_src);
 		if (ret != 0) {
 			log_debug("send", "send thread %hhu finished, no more target IPv6 addresses", s->thread_id);
 			goto cleanup;
@@ -468,7 +470,8 @@ int send_run(sock_t st, shard_t *s)
 
 		// IPv6
 		if (ipv6) {
-			int ret = ipv6_target_file_get_ipv6(&ipv6_dst);
+			ipv6_src = ipv6_default_src;
+			int ret = ipv6_target_file_get_ipv6(&ipv6_dst, &ipv6_src);
 			if (ret != 0) {
 				log_debug("send", "send thread %hhu finished, no more target IPv6 addresses", s->thread_id);
 				goto cleanup;
