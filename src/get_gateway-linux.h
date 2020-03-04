@@ -271,8 +271,8 @@ int get_iface_ip(char *iface, struct in_addr *ip)
 	strncpy(ifr.ifr_name, iface, IFNAMSIZ - 1);
 
 	if (ioctl(sock, SIOCGIFADDR, &ifr) < 0) {
-		close(sock);
-		log_fatal("get-iface-ip", "ioctl failure: %s", strerror(errno));
+		log_warn("get-iface-ip", "ioctl failure: %s", strerror(errno));
+		return EXIT_FAILURE;
 	}
 	ip->s_addr = ((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr;
 	close(sock);
